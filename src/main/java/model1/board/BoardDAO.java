@@ -78,6 +78,57 @@ public class BoardDAO extends JDBConnect {
 		return bbs;
 	}
 	
+	//검색 조건에 맞는 게시물 목록을 반환(페이징 처리 지원)
+	public List<BoardDTO> selectListPage(Map<String, Object> map){
+		//결과(게시물 목록)을 담을 변수
+		List<BoardDTO> bbs = new Vector<BoardDTO>();
+		
+		String query = " SELECT * FROM ( "
+					+ " 	SELECT tb.*, ROWNUM rNUM FROM ("
+					+ "			SELECT * FROM board	";
+		
+		// 검색조건 추가
+		if(map.get("searchWord") != null) {
+			query += " WHERE " + map.get("searchField") + " "
+					+ " LIKE '%" + map.get("searchWord") + "%'";
+		}
+		
+		query += " ORDER BY num DESC "
+				+ " )TB"
+				+ " ) "
+				+ " WHERE rNum BETWEEN ? AND ?";
+		
+		try {
+			
+			psmt = con.prepareStatement(query);
+			psmt.setString(1, map.get("start").toString());
+			psmt.setString(2, map.get("end").toString());
+			
+			rs = psmt.executeQuery();
+			
+			while(rs.next()) {
+				BoardDTO dto = new BoardDTO();
+				
+				dto.setNum(rs.getString("num"));
+				dto.setTitle(rs.getString("title"));
+				dto.setContent(rs.getString("content"));
+				dto.setPostdate(rs.getDate("postdate"));
+				dto.setId(rs.getString("id"));
+				dto.setVisitcount(rs.getString("visitcount"));
+
+				bbs.add(dto);
+				
+			}
+			
+		}catch(Exception e) {
+			System.out.println("게시물 조회 중 예외 발생");
+			e.printStackTrace();
+		}
+		
+		return bbs;
+	}
+	
+	
 	//게시글 데이터를 받아 DB에 추가합니다.
 	public int insertWrite(BoardDTO dto) {
 		int result = 0;

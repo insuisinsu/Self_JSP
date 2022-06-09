@@ -28,6 +28,7 @@ if(memberDTO.getId() != null){
 	session.setAttribute("UserId", memberDTO.getId());
 	session.setAttribute("UserName", memberDTO.getName());
 	response.sendRedirect("LoginForm.jsp");
+	out.println("로그인 성공");
 }else{
 	//로그인 실패
 	// request 영역에 저장된 값은 포워드된 페이지까지 공유됨
